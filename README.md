@@ -1,2 +1,4 @@
 # Invoice-Automation
-This Repository automatically creates Invoices for certain banks
+This repository automatically generates invoices for different Banks and Brokers by simply uploading the data in .xlsx format, and entering details like Invoice Number and Date.
+
+To generate a new invoice, follow the following steps: 1). Copy the data in an excel file. 2). Store the excel file in .xlsx format in the same directory as the app. 3). Start the app. 4). Select the bank, and choose the excel file that was previously saved. 5). Click "Load Data" to lead the data from the excel file. 6). Enter the Invoice Number and Month/Year, the Month/Year will be copied under the column of Disbursal Date 7). Re-Check all the details, incase of any edits, double click on the data to edit it. 8). Click "Create Invoice" to generate the invoice. 9). Name the invoice and save it (the invoice will be saved as pdf automatically). 10). A prompt confirming the Generation should appear in the case of a successfull creation. 11). The app windows can be closed safely. 12). Navigate to the folder to find your invoice.
