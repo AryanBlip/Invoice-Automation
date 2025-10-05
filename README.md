@@ -1,7 +1,7 @@
 # 🧾Invoice-Automation
 This repository automatically generates invoices for multiple Banks and Brokers — all you need to do is upload your data in an .xlsx file and provide basic details like Invoice Number and Date.
 
-🚀 <u>How to Generate a New Invoice</u>
+🚀 **<u>How to Generate a New Invoice</u>**
 
 📊 Copy the data in an excel file.
 
