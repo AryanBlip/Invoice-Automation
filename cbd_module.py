@@ -22,31 +22,31 @@ def resource_path(relative_path):
 
 class InvoiceAutomation:
     def __init__(self, parent_window, excel_file_path, main_app_root):
-        self.template = resource_path('DIBtemplate.docx')
+        self.template = resource_path('CBDtemplate.docx')
         self.root = parent_window
         self.main_app_root = main_app_root
-        self.root.title("Invoice Automation - DIB")
-        self.root.geometry("900x600")  # Bigger window for DIB since more columns
-
+        self.root.title("Invoice Automation - ADIB")
+        self.root.geometry("800x600") # Increased size for better table visibility
+        
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
-        # DIB-specific data
+        # ADIB's specific data
         self.bank_data = {
-            'Bank name': 'Dubai Islamic Bank',
-            'address': 'P.O. Box 1080, \nDubai, U.A.E.',
-            'TRN': '100123456700003'  # <-- Replace with actual DIB TRN if available
+            'Bank name': 'Commercial Bank of Dubai',
+            'address': 'P.O. Box 2668, \nDubai, U.A.E.',
+            'TRN': '100252062300003'
         }
 
         self.excel_file_path = excel_file_path
-
-        # --- UI Layout ---
+        
+        # UI Elements
         main_frame = Frame(self.root)
         main_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
         # --- Input Fields ---
         input_frame = Frame(main_frame)
         input_frame.pack(fill="x", pady=5)
-
+        
         self.invoice_number_label = Label(input_frame, text="Invoice Number:", anchor="e")
         self.invoice_number_label.grid(row=0, column=0, padx=5, pady=2, sticky="ew")
         self.invoice_number_entry = Entry(input_frame)
@@ -56,38 +56,34 @@ class InvoiceAutomation:
         self.month_year_label.grid(row=1, column=0, padx=5, pady=2, sticky="ew")
         self.month_year_entry = Entry(input_frame)
         self.month_year_entry.grid(row=1, column=1, padx=5, pady=2, sticky="ew")
-
+        
         input_frame.columnconfigure(1, weight=1)
 
-        # --- Treeview Table ---
+        # --- Data Display Table (Treeview) ---
         table_frame = Frame(main_frame)
         table_frame.pack(fill="both", expand=True, pady=10)
-
-        columns = ("Disbursal Date", "App reference", "Customer Name",
-                   "Loan Amount", "Payment Slab", "Payout",
-                   "5% VAT", "Incentive")
-
+        
+        # Define columns for the Treeview table
+        columns = ("Disbursal Date", "LMF No.", "Customer Name", "Loan Amount", "Payment Slab", "Incentive")
         self.tree = ttk.Treeview(table_frame, columns=columns, show="headings")
-
+        
         for col in columns:
             self.tree.heading(col, text=col)
             self.tree.column(col, width=120, anchor=CENTER)
             
-        # Explicitly center the Loan Amount column
-        self.tree.column("Loan Amount", anchor=CENTER)
-
         self.tree.pack(side="left", fill="both", expand=True)
 
+        # Add a vertical scrollbar
         scrollbar = ttk.Scrollbar(table_frame, orient=VERTICAL, command=self.tree.yview)
         self.tree.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side="right", fill="y")
-
-        # Editable cells
+        
+        # Make the table cells editable on double-click
         self.tree.bind('<Double-1>', self.on_double_click)
 
         # --- Note below the table ---
-        note_label = Label(main_frame,
-                              text="Note: The 'Disbursal Date' will be set to the 'Month Year' entered above when creating the invoice.",
+        note_label = Label(main_frame, 
+                              text="Note: The 'Disbursal Date' will be set to the 'Month Year' entered above when creating the invoice.", 
                               font=('Arial', 9, 'italic'),
                               fg='gray')
         note_label.pack(pady=(5, 0))
@@ -95,11 +91,11 @@ class InvoiceAutomation:
         # --- Buttons ---
         button_frame = Frame(main_frame)
         button_frame.pack(fill="x", pady=5)
-
+        
         self.create_button = Button(button_frame, text="Create Invoice", command=self.create_invoice)
         self.create_button.pack(side="left", padx=5, expand=True)
 
-        # Load Excel data
+        # Load data into the Treeview
         self.load_data_from_excel()
 
     @staticmethod
@@ -124,8 +120,7 @@ class InvoiceAutomation:
             return f"{formatted_integer_part}.{fractional_part}"
         else:
             return formatted_integer_part
-
-
+        
     @staticmethod
     def clean_and_convert_Integer(raw_string):
         # Regex: Find and remove everything that is NOT a digit (\d), a dot (\.), or a minus sign (\-)
@@ -144,45 +139,42 @@ class InvoiceAutomation:
         # The sub function alone is often enough, but a final .strip() is safe practice
         return str(cleaned_string.strip())
 
-
     def load_data_from_excel(self):
-        """Loads customer data from the Excel file into the Treeview."""
+        """Loads customer data from the selected Excel file into the Treeview."""
         try:
+            # Clear existing data in the treeview
             for item in self.tree.get_children():
                 self.tree.delete(item)
 
             df = read_excel(self.excel_file_path, header=None)
-
-            # Columns: 6,2,3,4,7,8 in Excel. Payout and VAT are calculated.
-            self.customer_data = df.iloc[:, [5, 1, 2, 3, 6, 7]].copy()
-
-            for _, row_data in self.customer_data.iterrows():
+            
+            # Use iloc to select columns by their position (0-indexed)
+            # Column 1 (index 0): Customer Name
+            # Column 2 (index 1): Disbursal Date
+            # Column 3 (index 2): Loan Amount
+            self.customer_data = df.iloc[:, [0, 1, 2, 3, 4, 5, 6, 7]].copy()
+            
+            # Iterate through DataFrame and insert into the Treeview
+            for index, row_data in self.customer_data.iterrows():
                 try:
-                    # Clean and process data from Excel
-                    disbursal_date_str = "(Month Year as stated above)"
-                    app_ref = str(row_data.iloc[1]) if notna(row_data.iloc[1]) else ""
-                    customer_name = str(row_data.iloc[2]).title() if notna(row_data.iloc[2]) else ""
-                    
-                    # Clean all numeric strings using sub
-                    loan_amount = float(self.clean_and_convert_Integer(row_data.iloc[3]))
+                    customer_name = str(self.clean_and_convert_String(row_data.iloc[2])).title()
+                    disbursal_date = "(Month Year as stated above)"
+                    loan_amount = float(self.clean_and_convert_Integer(row_data.iloc[5]))
+                    LMF_no = str(self.clean_and_convert_String(row_data.iloc[1]))
 
-                    payment_slab = 0.75
-                    if 10000000 <= loan_amount <= 24990000:
-                        payment_slab = 0.9
-                    elif loan_amount > 24990000:
-                        payment_slab = 1.1
+                    payment_slab = 1
                     
-                    # Calculated values
-                    Incentive = loan_amount * (payment_slab / 100)
-                    payout = Incentive / 1.05
-                    fivePercentVat = Incentive / 21
-
+                    incentive = loan_amount * payment_slab / 100
+                    
+                    # Insert the row into the Treeview
                     self.tree.insert("", END, values=(
-                        disbursal_date_str, app_ref, customer_name,
-                        f"{loan_amount:.2f}", f"{payment_slab:.2f}%",
-                        f"{payout:.2f}", f"{fivePercentVat:.2f}", f"{Incentive:.2f}"
+                        disbursal_date, 
+                        LMF_no,
+                        customer_name,
+                        self.IntComma(f"{loan_amount:.2f}"), 
+                        str(payment_slab) + "%", 
+                        self.IntComma(f"{incentive:.2f}")
                     ))
-
                 except Exception as e:
                     # TODO: DELETE STMT DURING DEPLOYMENT
                     print(f"Error processing row: {e}")
@@ -210,18 +202,19 @@ class InvoiceAutomation:
 
         except Exception as e:
             messagebox.showerror("Error", f"Unknown Error: {e}.\nContact the developer (Aryan).")
-
+            
     def on_double_click(self, event):
-        # Enable inline editing for cells, except Incentive, VAT, and Payout
+        # Handles double-click events to make a cell editable
         region = self.tree.identify("region", event.x, event.y)
         if region != "cell":
             return
-
+            
         column = self.tree.identify_column(event.x)
-        column_index = int(column[1:]) - 1  # 0-based
+        column_index = int(column[1:]) - 1 # Get 0-indexed column number
 
-        if column_index in (5, 6, 7):  # Payout, VAT, or Incentive column
-            messagebox.showinfo("Info", "This field is automatically calculated and not editable.")
+        # Do not allow editing for the 'Incentive' column (index 5)
+        if column_index == 5:
+            messagebox.showinfo("Info", "The Incentive field is automatically calculated and is not editable.")
             return
 
         item_id = self.tree.identify_row(event.y)
@@ -229,9 +222,10 @@ class InvoiceAutomation:
             return
 
         cell_value = self.tree.item(item_id, "values")[column_index]
-        x, y, width, height = self.tree.bbox(item_id, column)
 
-        entry_edit = ttk.Entry(self.tree, justify="center")
+        # Create a temporary entry widget for editing
+        x, y, width, height = self.tree.bbox(item_id, column)
+        entry_edit = ttk.Entry(self.tree, justify='center')
         entry_edit.place(x=x, y=y, width=width, height=height)
         entry_edit.insert(0, cell_value)
         entry_edit.focus()
@@ -239,34 +233,27 @@ class InvoiceAutomation:
         def save_edit(event):
             new_value = entry_edit.get()
             current_values = list(self.tree.item(item_id, "values"))
+            
+            # Update the Treeview with the new value
             current_values[column_index] = new_value
-
-            # Recalculate Payout, VAT and Incentive if Loan Amount or Payment Slab changed
-            if column_index in (3, 4):
+            
+            # Recalculate incentive if Loan Amount or Payment Slab changed
+            if column_index in (3,4):
                 try:
+                    # Clean the loan amount string before converting to float
                     loan_amount_str = sub(r'[^\d.]', '', str(current_values[3]))
                     loan_amount = float(loan_amount_str)
-
-                    payment_slab = 0.75
-                    if 10000000 <= loan_amount <= 24990000:
-                        payment_slab = 0.9
-                    elif loan_amount > 24990000:
-                        payment_slab = 1.1
-
-                    current_values[4] = str(payment_slab)
                     
-                    payout_calculated = loan_amount * payment_slab / 100
-                    vat_calculated = payout_calculated * 0.05
-                    incentive_calculated = payout_calculated + vat_calculated
-
+                    # Clean the payment slab string before converting to float
+                    payment_slab_str = str(current_values[4]).strip('%')
+                    payment_slab = float(payment_slab_str)
+                    
+                    incentive = loan_amount * payment_slab / 100
                     current_values[4] += "%" if "%" not in current_values[4] else ""
-                    
-                    current_values[5] = self.IntComma(f"{payout_calculated:.2f}")
-                    current_values[6] = self.IntComma(f"{vat_calculated:.2f}")
-                    current_values[7] = self.IntComma(f"{incentive_calculated:.2f}")
-                    
+                    current_values[5] = self.IntComma(f"{incentive:.2f}")
+
                 except ValueError:
-                    messagebox.showerror("Invalid Input", "Loan Amount and Payment Slab must be numeric.")
+                    messagebox.showerror("Invalid Input", "Loan Amount and Payment Slab must be numbers.")
                     return
 
             self.tree.item(item_id, values=current_values)
@@ -281,7 +268,7 @@ class InvoiceAutomation:
     def on_close(self):
         self.root.destroy()
         self.main_app_root.destroy()
-
+    
     @staticmethod
     def replace_text(paragraph, old_text, new_text, isTable=False):
         full = "".join(run.text for run in paragraph.runs) or paragraph.text
@@ -300,7 +287,7 @@ class InvoiceAutomation:
                 for paragraph in cell.paragraphs:
                     for run in paragraph.runs:
                         run.font.size = Pt(10)
-    
+                
     @staticmethod
     def number_to_words(num):
         try:
@@ -326,37 +313,37 @@ class InvoiceAutomation:
             return f"Error: {e}"
 
     def create_invoice(self):
-        """Generate invoice Word + PDF with table filled from Treeview."""
+        # Check if invoice number is empty
         if not self.invoice_number_entry.get():
             messagebox.showerror("Missing Information", "Please enter the Invoice Number.")
             return
 
+        # Check if month/year is empty
         if not self.month_year_entry.get():
             messagebox.showerror("Missing Information", "Please enter the Month Year.")
             return
 
+        # Get data directly from the Treeview
         items = self.tree.get_children()
         if not items:
-            messagebox.showerror("Error", "No data loaded.")
+            messagebox.showerror("Error", "No Excel data loaded. Please select a valid file.")
             return
         
         self.root.withdraw()  # Hide the current window
 
         totalLoanAmount = 0.0
-        totalPayout = 0.0
-        totalVAT = 0.0
         totalIncentive = 0.0
-
+        
         selected_bank = self.bank_data
         doc = Document(self.template)
 
         replacements = {
-            "[date today]": datetime.today().strftime('%d/%m/%Y'),
+            "[date today]" : datetime.today().strftime('%d/%m/%Y'),
             "[invoice number]": self.invoice_number_entry.get(),
-            "[bank name]": selected_bank['Bank name'],
-            "[address]": selected_bank['address'],
-            "[bank TRN]": selected_bank['TRN'],
-            "[month year]": self.month_year_entry.get().title()
+            "[bank name]" : selected_bank['Bank name'],
+            "[address]" : selected_bank['address'],
+            "[bank TRN]" : selected_bank['TRN'],  
+            "[month year]" : self.month_year_entry.get().title()
         }
 
         customer_table = None
@@ -370,63 +357,52 @@ class InvoiceAutomation:
             messagebox.showerror("Error", "Customer table not found in template.")
             return
 
+        # Loop through the rows of the Treeview widget
         for item_id in items:
-            row_data = self.tree.item(item_id, "values")
+            row_data = self.tree.item(item_id, 'values')
             try:
                 row = customer_table.add_row().cells
-
-                # Disbursal Date
+                
+                # Disbursal Date - Left-aligned by default, no change needed
                 row[0].text = self.month_year_entry.get().title() or str(row_data[0])
-
-                # App reference
+                
+                # Type (New) - Middle-aligned
                 row[1].text = str(row_data[1])
                 row[1].paragraphs[0].alignment = enum.text.WD_ALIGN_PARAGRAPH.CENTER
-
-                # Customer Name
+                
+                # Customer Name - Left-aligned by default, no change needed
                 row[2].text = str(row_data[2])
-
-                # Loan Amount
+                
+                # Loan Amount - Right-aligned
                 loan_amount_str = sub(r'[^\d.]', '', str(row_data[3]))
-                loan_amount = float(loan_amount_str)
-                row[3].text = self.IntComma(f"{loan_amount:.2f}")
-                row[3].paragraphs[0].alignment = enum.text.WD_ALIGN_PARAGRAPH.CENTER
-                totalLoanAmount += loan_amount
+                originalLoanAmount = float(loan_amount_str)
+                row[3].text = self.IntComma(f"{originalLoanAmount:.2f}")
+                row[3].paragraphs[0].alignment = enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+                totalLoanAmount += originalLoanAmount
 
-                # Payment Slab
+                # Payment Slab - Middle-aligned
                 row[4].text = str(row_data[4])
                 row[4].paragraphs[0].alignment = enum.text.WD_ALIGN_PARAGRAPH.CENTER
-
-                # Payout
-                payout_str = sub(r'[^\d.]', '', str(row_data[5]))
-                payout = float(payout_str)
-                row[5].text = self.IntComma(f"{payout:.2f}")
-                row[5].paragraphs[0].alignment = enum.text.WD_ALIGN_PARAGRAPH.CENTER
-                totalPayout += payout
-
-                # VAT
-                vat_str = sub(r'[^\d.]', '', str(row_data[6]))
-                vat = float(vat_str)
-                row[6].text = self.IntComma(f"{vat:.2f}")
-                row[6].paragraphs[0].alignment = enum.text.WD_ALIGN_PARAGRAPH.CENTER
-                totalVAT += vat
-
-                # Incentive
-                incentive_str = sub(r'[^\d.]', '', str(row_data[7]))
-                incentive = float(incentive_str)
-                row[7].text = self.IntComma(f"{incentive:.2f}")
-                row[7].paragraphs[0].alignment = enum.text.WD_ALIGN_PARAGRAPH.CENTER
-                totalIncentive += incentive
-
+                
+                # Incentive - Right-aligned
+                incentive_str = sub(r'[^\d.]', '', str(row_data[5]))
+                currentIncentive = float(incentive_str)
+                row[5].text = self.IntComma(f"{currentIncentive:.2f}")
+                row[5].paragraphs[0].alignment = enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+                totalIncentive += currentIncentive
+                
             except Exception as e:
-                messagebox.showerror("Data Error", f"Row error: {e}")
-                return
-
+                messagebox.showerror("Data Error", f"Error processing data for row {row_data[2]}. Check data types. Error: {e}")
+                return 
+        
+        vatIncentive = totalIncentive * 1.05
+        vatIncentive = float(f"{vatIncentive:.2f}")
         replacements.update({
+            "[five percent]": self.IntComma(f"{totalIncentive * 0.05:.2f}"),
             "[total loan]": self.IntComma(f"{totalLoanAmount:.2f}"),
-            "[total payout]": self.IntComma(f"{totalPayout:.2f}"),
-            "[total vat]": self.IntComma(f"{totalVAT:.2f}"),
-            "[VAT&incent]": self.IntComma(f"{totalIncentive:.2f}"),
-            "[AmtinWords]" : f"{self.number_to_words(totalIncentive)}"
+            "[total incent]": self.IntComma(f"{totalIncentive:.2f}"),
+            "[VAT&incent]": self.IntComma(f"{vatIncentive}"),
+            "[AmtinWords]" : f"{self.number_to_words(vatIncentive)}"
         })
 
         self.format_table_cells(customer_table)
@@ -448,6 +424,7 @@ class InvoiceAutomation:
                 doc.save('filled.docx')
                 convert('filled.docx', save_path)
                 messagebox.showinfo("Success", "Invoice created and saved successfully!")
+            
             try:
                 self.root.destroy()
                 self.main_app_root.destroy()
@@ -459,4 +436,4 @@ class InvoiceAutomation:
             except Exception as e:
                 pass
         except PermissionError:
-            messagebox.showerror("Error", "Permission denied. Close the file if it's open and try again.")
+            messagebox.showerror("Error", "Permission denied. Please close the file if it's open and try again.")

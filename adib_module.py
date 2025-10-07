@@ -121,6 +121,24 @@ class InvoiceAutomation:
         else:
             return formatted_integer_part
 
+    @staticmethod
+    def clean_and_convert_Integer(raw_string):
+        # Regex: Find and remove everything that is NOT a digit (\d), a dot (\.), or a minus sign (\-)
+        # This single line handles spaces, commas, and \xa0 characters effectively.
+        cleaned_string = sub(r'[^\d\.\-]', '', str(raw_string))
+        
+        # The sub function alone is often enough, but a final .strip() is safe practice
+        return str(cleaned_string.strip())
+    
+    @staticmethod
+    def clean_and_convert_String(raw_string):
+        # Regex: Find and remove everything that is NOT a digit (\d), a dot (\.), or a minus sign (\-)
+        # This single line handles spaces, commas, and \xa0 characters effectively.
+        cleaned_string = raw_string.replace('\xa0', '').strip()
+        
+        # The sub function alone is often enough, but a final .strip() is safe practice
+        return str(cleaned_string.strip())
+
     def load_data_from_excel(self):
         """Loads customer data from the selected Excel file into the Treeview."""
         try:
@@ -139,9 +157,9 @@ class InvoiceAutomation:
             # Iterate through DataFrame and insert into the Treeview
             for index, row_data in self.customer_data.iterrows():
                 try:
-                    customer_name = str(row_data.iloc[0]).title()
+                    customer_name = str(self.clean_and_convert_String(row_data.iloc[0])).title()
                     disbursal_date = "(Month Year as stated above)"
-                    loan_amount = float(row_data.iloc[2])
+                    loan_amount = float(self.clean_and_convert_Integer(row_data.iloc[2]))
 
                     payment_slab = 0.9
                     
@@ -219,7 +237,7 @@ class InvoiceAutomation:
             current_values[column_index] = new_value
             
             # Recalculate incentive if Loan Amount or Payment Slab changed
-            if column_index in [3,4]:
+            if column_index in (3,4):
                 try:
                     # Clean the loan amount string before converting to float
                     loan_amount_str = sub(r'[^\d.]', '', str(current_values[3]))
@@ -329,7 +347,7 @@ class InvoiceAutomation:
 
         customer_table = None
         for table in doc.tables:
-            headers = [cell.text.strip().lower() for cell in table.rows[0].cells]
+            headers = (cell.text.strip().lower() for cell in table.rows[0].cells)
             if "customer name" in headers and "loan amount" in headers:
                 customer_table = table
                 break
@@ -355,8 +373,8 @@ class InvoiceAutomation:
                 row[2].text = str(row_data[2])
                 
                 # Loan Amount - Right-aligned
-                loan_amount_str = sub(r'[^\d.]', '', str(row_data[3]))
-                originalLoanAmount = float(loan_amount_str)
+
+                originalLoanAmount = float(str(row_data[3]))
                 row[3].text = self.IntComma(f"{originalLoanAmount:.2f}")
                 row[3].paragraphs[0].alignment = enum.text.WD_ALIGN_PARAGRAPH.RIGHT
                 totalLoanAmount += originalLoanAmount
@@ -366,8 +384,7 @@ class InvoiceAutomation:
                 row[4].paragraphs[0].alignment = enum.text.WD_ALIGN_PARAGRAPH.CENTER
                 
                 # Incentive - Right-aligned
-                incentive_str = sub(r'[^\d.]', '', str(row_data[5]))
-                currentIncentive = float(incentive_str)
+                currentIncentive = float(str(row_data[5]))
                 row[5].text = self.IntComma(f"{currentIncentive:.2f}")
                 row[5].paragraphs[0].alignment = enum.text.WD_ALIGN_PARAGRAPH.RIGHT
                 totalIncentive += currentIncentive
