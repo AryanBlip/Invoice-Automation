@@ -32,9 +32,9 @@ class InvoiceAutomation:
 
         # DIB-specific data
         self.bank_data = {
-            'Bank name': 'Dubai Islamic Bank',
+            'Bank name': 'Dubai Islamic Bank PJSC',
             'address': 'P.O. Box 1080, \nDubai, U.A.E.',
-            'TRN': '100123456700003'  # <-- Replace with actual DIB TRN if available
+            'TRN': '1002719233000033'  # <-- Replace with actual DIB TRN if available
         }
 
         self.excel_file_path = excel_file_path
@@ -153,24 +153,21 @@ class InvoiceAutomation:
 
             df = read_excel(self.excel_file_path, header=None)
 
-            # Columns: 6,2,3,4,7,8 in Excel. Payout and VAT are calculated.
+            # TODO: FIX PAYMENT SLAB ISSUE AND REFER TO TABULAR FORMAT OF DIB
+            # Columns: 1, 2, 3, 6, 7, 8, 9 in Excel. Payout and VAT are calculated.
             self.customer_data = df.iloc[:, [5, 1, 2, 3, 6, 7]].copy()
 
             for _, row_data in self.customer_data.iterrows():
                 try:
                     # Clean and process data from Excel
                     disbursal_date_str = "(Month Year as stated above)"
-                    app_ref = str(row_data.iloc[1]) if notna(row_data.iloc[1]) else ""
-                    customer_name = str(row_data.iloc[2]).title() if notna(row_data.iloc[2]) else ""
+                    app_ref = self.clean_and_convert_String(row_data.iloc[1]) if notna(row_data.iloc[1]) else ""
+                    customer_name = self.clean_and_convert_String(row_data.iloc[2]).title() if notna(row_data.iloc[2]) else ""
                     
                     # Clean all numeric strings using sub
                     loan_amount = float(self.clean_and_convert_Integer(row_data.iloc[3]))
-
-                    payment_slab = 0.75
-                    if 10000000 <= loan_amount <= 24990000:
-                        payment_slab = 0.9
-                    elif loan_amount > 24990000:
-                        payment_slab = 1.1
+                
+                    payment_slab = float(self.clean_and_convert_String(str(row_data.iloc[4]))) * 100
                     
                     # Calculated values
                     Incentive = loan_amount * (payment_slab / 100)
@@ -247,12 +244,9 @@ class InvoiceAutomation:
                     loan_amount_str = sub(r'[^\d.]', '', str(current_values[3]))
                     loan_amount = float(loan_amount_str)
 
-                    payment_slab = 0.75
-                    if 10000000 <= loan_amount <= 24990000:
-                        payment_slab = 0.9
-                    elif loan_amount > 24990000:
-                        payment_slab = 1.1
-
+                    payment_slab_str = sub(r'[^\d.]', '', str(current_values[4]))
+                    payment_slab = float(payment_slab_str)
+                
                     current_values[4] = str(payment_slab)
                     
                     payout_calculated = loan_amount * payment_slab / 100
