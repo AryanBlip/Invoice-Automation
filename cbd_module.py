@@ -152,15 +152,15 @@ class InvoiceAutomation:
             # Column 1 (index 0): Customer Name
             # Column 2 (index 1): Disbursal Date
             # Column 3 (index 2): Loan Amount
-            self.customer_data = df.iloc[:, [0, 1, 2, 3, 4, 5, 6, 7]].copy()
+            self.customer_data = df.iloc[:, [0, 1, 2, 3, 4, 5, 6]].copy()
             
             # Iterate through DataFrame and insert into the Treeview
             for index, row_data in self.customer_data.iterrows():
                 try:
-                    customer_name = str(self.clean_and_convert_String(row_data.iloc[2])).title()
+                    customer_name = str(self.clean_and_convert_String(row_data.iloc[1])).title()
                     disbursal_date = "(Month Year as stated above)"
-                    loan_amount = float(self.clean_and_convert_Integer(row_data.iloc[5]))
-                    LMF_no = str(self.clean_and_convert_String(row_data.iloc[1]))
+                    loan_amount = float(self.clean_and_convert_Integer(row_data.iloc[4]))
+                    LMF_no = str(self.clean_and_convert_String(row_data.iloc[0]))
 
                     payment_slab = 1
                     
@@ -366,7 +366,7 @@ class InvoiceAutomation:
                 # Disbursal Date - Left-aligned by default, no change needed
                 row[0].text = self.month_year_entry.get().title() or str(row_data[0])
                 
-                # Type (New) - Middle-aligned
+                # LMF
                 row[1].text = str(row_data[1])
                 row[1].paragraphs[0].alignment = enum.text.WD_ALIGN_PARAGRAPH.CENTER
                 
