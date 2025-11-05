@@ -252,6 +252,7 @@ class InvoiceAutomation:
                     current_values[5] = self.IntComma(f"{incentive:.2f}")
 
                 except ValueError:
+                    print("ISSUE 2")
                     messagebox.showerror("Invalid Input", "Loan Amount and Payment Slab must be numbers.")
                     return
 
@@ -373,8 +374,7 @@ class InvoiceAutomation:
                 row[2].text = str(row_data[2])
                 
                 # Loan Amount - Right-aligned
-
-                originalLoanAmount = float(str(row_data[3]))
+                originalLoanAmount = float(self.clean_and_convert_Integer(str(row_data[3])))
                 row[3].text = self.IntComma(f"{originalLoanAmount:.2f}")
                 row[3].paragraphs[0].alignment = enum.text.WD_ALIGN_PARAGRAPH.RIGHT
                 totalLoanAmount += originalLoanAmount
@@ -384,7 +384,7 @@ class InvoiceAutomation:
                 row[4].paragraphs[0].alignment = enum.text.WD_ALIGN_PARAGRAPH.CENTER
                 
                 # Incentive - Right-aligned
-                currentIncentive = float(str(row_data[5]))
+                currentIncentive = float(self.clean_and_convert_Integer(str(row_data[5])))
                 row[5].text = self.IntComma(f"{currentIncentive:.2f}")
                 row[5].paragraphs[0].alignment = enum.text.WD_ALIGN_PARAGRAPH.RIGHT
                 totalIncentive += currentIncentive
