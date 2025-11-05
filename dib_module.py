@@ -30,13 +30,6 @@ class InvoiceAutomation:
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
-        # DIB-specific data
-        self.bank_data = {
-            'Bank name': 'Dubai Islamic Bank PJSC',
-            'address': 'P.O. Box 1080, \nDubai, U.A.E.',
-            'TRN': '1002719233000033'  # <-- Replace with actual DIB TRN if available
-        }
-
         self.excel_file_path = excel_file_path
 
         # --- UI Layout ---
@@ -321,27 +314,44 @@ class InvoiceAutomation:
         
     @staticmethod
     def convertToFull(month_year):
-        month_year = month_year.split(" ")
+        try:
+            
+            if " " in month_year:
+                month_year = month_year.split(" ")
+                month = month_year[0]
+                year = month_year[1]
 
-        month = month_year[0]
-        year = month_year[1]
+            else :
+                month = ""
+                other = ""
+                year = ""
 
-        months = {
-            "jan": "January",
-            "feb": "February",
-            "mar": "March",
-            "apr": "April",
-            "may": "May",
-            "jun": "June",
-            "jul": "July",
-            "aug": "August",
-            "sep": "September",
-            "oct": "October",
-            "nov": "November",
-            "dec": "December"
-        }
+                for i in month_year:
+                    if i.isalpha():
+                        month += i
+                    elif i.isnumeric():
+                        year += i
+                    else:
+                        other += i
 
-        return months.get(month, month) + " " + year
+            months = {
+                "jan": "January",
+                "feb": "February",
+                "mar": "March",
+                "apr": "April",
+                "may": "May",
+                "jun": "June",
+                "jul": "July",
+                "aug": "August",
+                "sep": "September",
+                "oct": "October",
+                "nov": "November",
+                "dec": "December"
+            }
+
+            return months.get(month, month) + ((" " + year) if year else year)
+        except IndexError:
+            messagebox.showerror("Missing Information", "Please enter month and year")
 
     def create_invoice(self):
         """Generate invoice Word + PDF with table filled from Treeview."""
@@ -365,15 +375,11 @@ class InvoiceAutomation:
         totalVAT = 0.0
         totalIncentive = 0.0
 
-        selected_bank = self.bank_data
         doc = Document(self.template)
 
         replacements = {
             "[date today]": datetime.today().strftime('%d/%m/%Y'),
             "[invoice number]": self.invoice_number_entry.get(),
-            "[bank name]": selected_bank['Bank name'],
-            "[address]": selected_bank['address'],
-            "[bank TRN]": selected_bank['TRN'],
             "[FullMonth year]" : self.convertToFull(self.month_year_entry.get().lower()),
             "[month year]": self.month_year_entry.get().title()
         }

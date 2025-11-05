@@ -30,13 +30,6 @@ class InvoiceAutomation:
         
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
-        # ADIB's specific data
-        self.bank_data = {
-            'Bank name': 'ADIB',
-            'address': 'P.O. Box 313, \nAbu Dhabi, U.A.E.',
-            'TRN': '100280472000003'
-        }
-
         self.excel_file_path = excel_file_path
         
         # UI Elements
@@ -314,27 +307,44 @@ class InvoiceAutomation:
         
     @staticmethod
     def convertToFull(month_year):
-        month_year = month_year.split(" ")
+        try:
 
-        month = month_year[0]
-        year = month_year[1]
+            if " " in month_year:
+                month_year = month_year.split(" ")
+                month = month_year[0]
+                year = month_year[1]
 
-        months = {
-            "jan": "January",
-            "feb": "February",
-            "mar": "March",
-            "apr": "April",
-            "may": "May",
-            "jun": "June",
-            "jul": "July",
-            "aug": "August",
-            "sep": "September",
-            "oct": "October",
-            "nov": "November",
-            "dec": "December"
-        }
+            else :
+                month = ""
+                other = ""
+                year = ""
 
-        return months.get(month, month) + " " + year
+                for i in month_year:
+                    if i.isalpha():
+                        month += i
+                    elif i.isnumeric():
+                        year += i
+                    else:
+                        other += i
+
+            months = {
+                "jan": "January",
+                "feb": "February",
+                "mar": "March",
+                "apr": "April",
+                "may": "May",
+                "jun": "June",
+                "jul": "July",
+                "aug": "August",
+                "sep": "September",
+                "oct": "October",
+                "nov": "November",
+                "dec": "December"
+            }
+
+            return months.get(month, month) + ((" " + year) if year else year)
+        except IndexError:
+            messagebox.showerror("Missing Information", "Please enter month and year")
 
     def create_invoice(self):
         # Check if invoice number is empty
@@ -358,15 +368,11 @@ class InvoiceAutomation:
         totalLoanAmount = 0.0
         totalIncentive = 0.0
         
-        selected_bank = self.bank_data
         doc = Document(self.template)
 
         replacements = {
             "[date today]" : datetime.today().strftime('%d/%m/%Y'),
             "[invoice number]": self.invoice_number_entry.get(),
-            "[bank name]" : selected_bank['Bank name'],
-            "[address]" : selected_bank['address'],
-            "[bank TRN]" : selected_bank['TRN'],
             "[FullMonth year]" : self.convertToFull(self.month_year_entry.get().lower()),
             "[month year]" : self.month_year_entry.get().title()
         }
