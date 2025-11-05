@@ -318,6 +318,30 @@ class InvoiceAutomation:
 
         except Exception as e:
             return f"Error: {e}"
+        
+    @staticmethod
+    def convertToFull(month_year):
+        month_year = month_year.split(" ")
+
+        month = month_year[0]
+        year = month_year[1]
+
+        months = {
+            "jan": "January",
+            "feb": "February",
+            "mar": "March",
+            "apr": "April",
+            "may": "May",
+            "jun": "June",
+            "jul": "July",
+            "aug": "August",
+            "sep": "September",
+            "oct": "October",
+            "nov": "November",
+            "dec": "December"
+        }
+
+        return months.get(month, month) + " " + year
 
     def create_invoice(self):
         """Generate invoice Word + PDF with table filled from Treeview."""
@@ -350,6 +374,7 @@ class InvoiceAutomation:
             "[bank name]": selected_bank['Bank name'],
             "[address]": selected_bank['address'],
             "[bank TRN]": selected_bank['TRN'],
+            "[FullMonth year]" : self.convertToFull(self.month_year_entry.get().lower()),
             "[month year]": self.month_year_entry.get().title()
         }
 

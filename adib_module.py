@@ -248,7 +248,7 @@ class InvoiceAutomation:
                     payment_slab = float(payment_slab_str)
                     
                     incentive = loan_amount * payment_slab / 100
-                    current_values[4] += "%"
+                    current_values[4] += "%" if "%" not in current_values[4] else ""
                     current_values[5] = self.IntComma(f"{incentive:.2f}")
 
                 except ValueError:
@@ -311,6 +311,30 @@ class InvoiceAutomation:
 
         except Exception as e:
             return f"Error: {e}"
+        
+    @staticmethod
+    def convertToFull(month_year):
+        month_year = month_year.split(" ")
+
+        month = month_year[0]
+        year = month_year[1]
+
+        months = {
+            "jan": "January",
+            "feb": "February",
+            "mar": "March",
+            "apr": "April",
+            "may": "May",
+            "jun": "June",
+            "jul": "July",
+            "aug": "August",
+            "sep": "September",
+            "oct": "October",
+            "nov": "November",
+            "dec": "December"
+        }
+
+        return months.get(month, month) + " " + year
 
     def create_invoice(self):
         # Check if invoice number is empty
@@ -342,7 +366,8 @@ class InvoiceAutomation:
             "[invoice number]": self.invoice_number_entry.get(),
             "[bank name]" : selected_bank['Bank name'],
             "[address]" : selected_bank['address'],
-            "[bank TRN]" : selected_bank['TRN'],  
+            "[bank TRN]" : selected_bank['TRN'],
+            "[FullMonth year]" : self.convertToFull(self.month_year_entry.get().lower()),
             "[month year]" : self.month_year_entry.get().title()
         }
 
