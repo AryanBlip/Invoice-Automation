@@ -1,9 +1,11 @@
 print("WELCOME TO INVOICE GENERATION !")
-print("\nLoading Main Application...")
+
 from tkinter import Tk, Toplevel, TclError
 from tkinter import messagebox, Label
 from tkinter import ttk, StringVar
 from tkinter import filedialog, Button
+
+#TODO: ADD INSTRUCTIONS
 
 class MainApp:
     def __init__(self):
@@ -11,9 +13,12 @@ class MainApp:
         self.root.title("Invoice Generation - Bank Selection")
         self.root.geometry("400x250") # Adjust window size to fit new elements
 
+        #TODO: ADD BANKS HERE
         self.bill_to_banks = {
             'ADIB': 1,
-            'DIB': 2
+            'DIB': 2,
+            'CBD' : 3,
+            'MASHREQ' : 4
         }
 
         # New attribute to store the selected Excel file path
@@ -26,7 +31,7 @@ class MainApp:
         self.selected_bank = StringVar(self.root)
         self.selected_bank.set("Select Bank")
 
-        bank_options = list(self.bill_to_banks.keys())
+        bank_options = tuple(self.bill_to_banks.keys())
         dropdown = ttk.Combobox(self.root, textvariable=self.selected_bank, values=bank_options, state="readonly")
         dropdown.pack(pady=5)
         
@@ -47,7 +52,7 @@ class MainApp:
     def ask_excel_file(self):
         file_path = filedialog.askopenfilename(
             title="Select an Excel file",
-            filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")]
+            filetypes=(("Excel files", "*.xlsx"), ("All files", "*.*"))
         )
         if file_path:
             self.excel_file_path = file_path
@@ -73,6 +78,20 @@ class MainApp:
 
             self.bill_to_banks = {
                 'DIB': dib.InvoiceAutomation
+            }
+
+        elif selected_bank_name == "CBD":
+            import cbd_module as cbd
+
+            self.bill_to_banks = {
+                'CBD': cbd.InvoiceAutomation
+            }
+        
+        elif selected_bank_name == "MASHREQ":
+            import mashreq_module as msq
+
+            self.bill_to_banks = {
+                'MASHREQ' : msq.InvoiceAutomation
             }
 
         print(f"Processing file : {self.excel_file_path}\n")
