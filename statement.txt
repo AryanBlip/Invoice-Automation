@@ -1,0 +1,7 @@
+NORMAL EXE = pyinstaller --onefile --add-data "ADIBtemplate.docx;." --add-data "DIBtemplate.docx;." main.py
+
+NO CONSOLE = pyinstaller --onefile --noconsole --add-data "ADIBtemplate.docx;." --add-data "DIBtemplate.docx;." main.py
+
+NUITKA (bundle docx) = python -m nuitka --onefile main.py --enable-plugin=tk-inter --include-data-files=ADIBtemplate.docx=./ --include-data-files=DIBtemplate.docx=./
+
+NUITKA (without bundle) = python -m nuitka --standalone --onefile main.py --lto=yes --follow-imports --enable-plugin=tk-inter
