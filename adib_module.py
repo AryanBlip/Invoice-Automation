@@ -308,7 +308,7 @@ class InvoiceAutomation:
     @staticmethod
     def convertToFull(month_year):
         try:
-
+            
             if " " in month_year:
                 month_year = month_year.split(" ")
                 month = month_year[0]
@@ -328,21 +328,41 @@ class InvoiceAutomation:
                         other += i
 
             months = {
-                "jan": "January",
-                "feb": "February",
-                "mar": "March",
-                "apr": "April",
-                "may": "May",
-                "jun": "June",
-                "jul": "July",
-                "aug": "August",
-                "sep": "September",
-                "oct": "October",
-                "nov": "November",
-                "dec": "December"
+                "jan" : "january", 
+                "feb" : "february",
+                "mar" : "march",
+                "apr" : "april",
+                "may" : "may",
+                "jun" : "june",
+                "jul" : "july",
+                "aug" : "august",
+                "sep" : "september",
+                "oct" : "october",
+                "nov" : "november",
+                "dec" : "december"
             }
 
-            return months.get(month, month) + ((" " + year) if year else year)
+            full_month_year = months.get(month, month) + ((" " + year) if year else year)
+
+            months = {
+                "january" : "jan", 
+                "february" : "feb",
+                "march" : "mar",
+                "april" : "apr",
+                "may" : "may",
+                "june" : "jun",
+                "july" : "jul",
+                "august" : "aug",
+                "september" : "sep",
+                "october" : "oct",
+                "november" : "nov",
+                "december" : "dec"
+            }
+
+            half_month_year = months.get(month, month) + ((" " + year) if year else year)
+
+            return (half_month_year, full_month_year)
+
         except IndexError:
             messagebox.showerror("Missing Information", "Please enter month and year")
 
@@ -373,8 +393,8 @@ class InvoiceAutomation:
         replacements = {
             "[date today]" : datetime.today().strftime('%d/%m/%Y'),
             "[invoice number]": self.invoice_number_entry.get(),
-            "[FullMonth year]" : self.convertToFull(self.month_year_entry.get().lower()).title(),
-            "[month year]" : self.month_year_entry.get().title()
+            "[FullMonth year]" : self.convertToFull( self.month_year_entry.get().lower() )[1].title(),
+            "[month year]" : self.convertToFull( self.month_year_entry.get().lower() )[0].title()
         }
 
         customer_table = None
