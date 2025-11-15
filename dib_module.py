@@ -343,7 +343,7 @@ class InvoiceAutomation:
                 "jun" : "june",
                 "jul" : "july",
                 "aug" : "august",
-                "sep" : "september",
+                "sept" : "september",
                 "oct" : "october",
                 "nov" : "november",
                 "dec" : "december"
@@ -360,7 +360,7 @@ class InvoiceAutomation:
                 "june" : "jun",
                 "july" : "jul",
                 "august" : "aug",
-                "september" : "sep",
+                "september" : "sept",
                 "october" : "oct",
                 "november" : "nov",
                 "december" : "dec"
@@ -399,7 +399,7 @@ class InvoiceAutomation:
 
         replacements = {
             "[date today]": datetime.today().strftime('%d/%m/%Y'),
-            "[invoice number]": self.invoice_number_entry.get(),
+            "[invoice no]": self.invoice_number_entry.get(),
             "[FullMonth year]" : self.convertToFull( self.month_year_entry.get().lower() )[1].title(),
             "[month year]" : self.convertToFull( self.month_year_entry.get().lower() )[0].title()
         }

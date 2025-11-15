@@ -393,7 +393,7 @@ class InvoiceAutomation:
 
         replacements = {
             "[date today]" : datetime.today().strftime('%d/%m/%Y'),
-            "[invoice number]": self.invoice_number_entry.get(),
+            "[invoice no]": self.invoice_number_entry.get(),
             "[FullMonth year]" : self.convertToFull( self.month_year_entry.get().lower() )[1].title(),
             "[month year]" : self.convertToFull( self.month_year_entry.get().lower() )[0].title()
         }
