@@ -5,13 +5,14 @@ This repository automatically generates invoices for multiple Banks and Brokers 
 
 🚀 **<u>How to Generate a New Invoice</u>**
 
-📊 Copy the data in an excel file.
+📊 Copy the table/data in an excel file along with the headers (this is important).
 
-💾 Save the file in .xlsx format in the same directory as the app.
+💾 Save the file in **.xlsx** format in the same directory as the app.
 
 ▶️ Start the app.
 
 🏦 Select the bank and choose the previously saved .xlsx file.
+    (*.All Files can be selected if the file is in .ods format)
 
 📥 Click "Load Data" to import the data from the Excel file.
 
