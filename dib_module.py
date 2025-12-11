@@ -406,8 +406,8 @@ class InvoiceAutomation:
 
         customer_table = None
         for table in doc.tables:
-            headers = (cell.text.strip().lower() for cell in table.rows[0].cells)
-            if "customer name" in headers and "loan amount" in headers:
+            headers = [cell.text.strip().lower() for cell in table.rows[0].cells]
+            if "customer name" in headers:
                 customer_table = table
                 break
 
