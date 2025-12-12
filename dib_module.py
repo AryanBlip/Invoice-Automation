@@ -45,10 +45,18 @@ class InvoiceAutomation:
         self.invoice_number_entry = Entry(input_frame)
         self.invoice_number_entry.grid(row=0, column=1, padx=5, pady=2, sticky="ew")
 
+        self.invoice_date = datetime.today().strftime('%d/%m/%Y')
+        
+        self.invoice_date_label = Label(input_frame, text="Invoice Date:", anchor="e")
+        self.invoice_date_label.grid(row=1, column=0, padx=5, pady=2, sticky="ew")
+        self.invoice_date_entry = Entry(input_frame)
+        self.invoice_date_entry.insert(END, self.invoice_date)
+        self.invoice_date_entry.grid(row=1, column=1, padx=5, pady=2, sticky="ew")
+
         self.month_year_label = Label(input_frame, text="Month Year:", anchor="e")
-        self.month_year_label.grid(row=1, column=0, padx=5, pady=2, sticky="ew")
+        self.month_year_label.grid(row=2, column=0, padx=5, pady=2, sticky="ew")
         self.month_year_entry = Entry(input_frame)
-        self.month_year_entry.grid(row=1, column=1, padx=5, pady=2, sticky="ew")
+        self.month_year_entry.grid(row=2, column=1, padx=5, pady=2, sticky="ew")
 
         input_frame.columnconfigure(1, weight=1)
 
@@ -398,7 +406,7 @@ class InvoiceAutomation:
         doc = Document(self.template)
 
         replacements = {
-            "[date today]": datetime.today().strftime('%d/%m/%Y'),
+            "[date today]": self.invoice_date_entry.get(),
             "[invoice no]": self.invoice_number_entry.get(),
             "[FullMonth year]" : self.convertToFull( self.month_year_entry.get().lower() )[1].title(),
             "[month year]" : self.convertToFull( self.month_year_entry.get().lower() )[0].title()

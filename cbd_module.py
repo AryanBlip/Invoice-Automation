@@ -1,3 +1,5 @@
+# TODO: FOR NOW, COMPLETE BACKUP IS TAKEN ON GITHUB - aryanBLIP, djjerr
+# this file is being used as an experiment to develop a system to read excel data based on header given by
 from datetime import datetime
 from tkinter import filedialog, messagebox, ttk, Label, Frame, Entry
 from tkinter import TclError, END, Button, VERTICAL, CENTER 
@@ -45,10 +47,18 @@ class InvoiceAutomation:
         self.invoice_number_entry = Entry(input_frame)
         self.invoice_number_entry.grid(row=0, column=1, padx=5, pady=2, sticky="ew")
 
+        self.invoice_date = datetime.today().strftime('%d/%m/%Y')
+        
+        self.invoice_date_label = Label(input_frame, text="Invoice Date:", anchor="e")
+        self.invoice_date_label.grid(row=1, column=0, padx=5, pady=2, sticky="ew")
+        self.invoice_date_entry = Entry(input_frame)
+        self.invoice_date_entry.insert(END, self.invoice_date)
+        self.invoice_date_entry.grid(row=1, column=1, padx=5, pady=2, sticky="ew")
+
         self.month_year_label = Label(input_frame, text="Month Year:", anchor="e")
-        self.month_year_label.grid(row=1, column=0, padx=5, pady=2, sticky="ew")
+        self.month_year_label.grid(row=2, column=0, padx=5, pady=2, sticky="ew")
         self.month_year_entry = Entry(input_frame)
-        self.month_year_entry.grid(row=1, column=1, padx=5, pady=2, sticky="ew")
+        self.month_year_entry.grid(row=2, column=1, padx=5, pady=2, sticky="ew")
         
         input_frame.columnconfigure(1, weight=1)
 
@@ -139,21 +149,32 @@ class InvoiceAutomation:
             for item in self.tree.get_children():
                 self.tree.delete(item)
 
+            self.true_header = []
+
+            # true header is the fetched header from excel file to identify data
             df = read_excel(self.excel_file_path, header=None)
-            
-            # Use iloc to select columns by their position (0-indexed)
-            # Column 1 (index 0): Customer Name
-            # Column 2 (index 1): Disbursal Date
-            # Column 3 (index 2): Loan Amount
-            self.customer_data = df.iloc[:, [0, 1, 2, 3, 4, 5, 6]].copy()
+            for index, row_data in df.iterrows():
+                current_list = [self.clean_and_convert_String(str(x)).lower() for x in row_data]
+                if "customer name" in current_list:
+                    self.true_header = current_list
+                    break
+
+            print(self.true_header)
+            self.customer_data = df
             
             # Iterate through DataFrame and insert into the Treeview
             for index, row_data in self.customer_data.iterrows():
                 try:
-                    customer_name = str(self.clean_and_convert_String(row_data.iloc[1])).title()
+                    customer_name_index = self.true_header.index('customer name')
+                    customer_name = str(self.clean_and_convert_String(row_data.iloc[ customer_name_index ])).title()
+
                     disbursal_date = "(Month Year as stated above)"
+
+
                     loan_amount = float(self.clean_and_convert_Integer(row_data.iloc[4]))
                     LMF_no = str(self.clean_and_convert_String(row_data.iloc[0]))
+
+                    print(f"{customer_name}")
 
                     payment_slab = 1
                     
@@ -392,7 +413,7 @@ class InvoiceAutomation:
         doc = Document(self.template)
 
         replacements = {
-            "[date today]" : datetime.today().strftime('%d/%m/%Y'),
+            "[date today]" : self.invoice_date_entry.get(),
             "[invoice no]": self.invoice_number_entry.get(),
             "[FullMonth year]" : self.convertToFull( self.month_year_entry.get().lower() )[1].title(),
             "[month year]" : self.convertToFull( self.month_year_entry.get().lower() )[0].title()
