@@ -5,18 +5,18 @@ This repository automatically generates invoices for multiple Banks and Brokers 
 
 🚀 **<u>How to Generate a New Invoice</u>**
 
-📊 Copy the table/data in an excel file along with the headers (this is important).
+📊 Copy the table/data in an excel file along with the headers (Headers in Excel file are mandatory).
 
-💾 Save the file in **.xlsx** format in the same directory as the app.
+💾 Save the file in the same directory/path as the app.
 
 ▶️ Start the app.
 
-🏦 Select the bank and choose the previously saved .xlsx file.
-    (*.All Files can be selected if the file is in .ods format)
+🏦 Select the bank and choose the previously saved Excel file saved in the same directory/path.
+    (IF YOUR FILE DOESNT APPEAR IN THE FILES DIALOG - click **"*.All Files"** on the bottom right of the file dialog)
 
 📥 Click "Load Data" to import the data from the Excel file.
 
-🗓️ Enter the Invoice Number and Month/Year
+🗓️ Enter the 'Invoice Number' and 'Month Year', and revise the 'Date of Creation'
 
 (The Month/Year will automatically appear under the Disbursal Date column.)
 
@@ -26,7 +26,7 @@ This repository automatically generates invoices for multiple Banks and Brokers 
 
 💾 Name and save the invoice — it will be automatically saved as a .pdf file.
 
-✅ A confirmation prompt will appear once the invoice is successfully created.
+✅ A confirmation dialog box will appear once the invoice is successfully created.
 
 ❌ Close the app window safely.
 
