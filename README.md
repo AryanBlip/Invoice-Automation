@@ -12,7 +12,8 @@ This repository automatically generates invoices for multiple Banks and Brokers 
 ▶️ Start the app.
 
 🏦 Select the bank and choose the previously saved Excel file saved in the same directory/path.
-    (IF YOUR FILE DOESNT APPEAR IN THE FILES DIALOG - click **"*.All Files"** on the bottom right of the file dialog)
+    
+(IF YOUR FILE DOESNT APPEAR IN THE FILES DIALOG - click **"*.All Files"** on the bottom right of the file dialog)
 
 📥 Click "Load Data" to import the data from the Excel file.
 
