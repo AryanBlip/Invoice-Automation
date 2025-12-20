@@ -25,7 +25,7 @@ This repository automatically generates invoices for multiple Banks and Brokers 
 
 🧩 Click "Create Invoice" to generate your invoice.
 
-💾 Name and save the invoice — it will be automatically saved as a .pdf file.
+💾 Name and save the invoice — The created invoice will be automatically saved as a .pdf file.
 
 ✅ A confirmation dialog box will appear once the invoice is successfully created.
 
