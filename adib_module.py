@@ -147,25 +147,31 @@ class InvoiceAutomation:
             for item in self.tree.get_children():
                 self.tree.delete(item)
 
-            df = read_excel(self.excel_file_path, header=None)
-            
-            # Use iloc to select columns by their position (0-indexed)
-            # Column 1 (index 0): Customer Name
-            # Column 2 (index 1): Disbursal Date
-            # Column 3 (index 2): Loan Amount
-            self.customer_data = df.iloc[:, [0, 1, 2]].copy()
+            self.true_header = []
+
+            # true header is the fetched header from excel file to identify data
+            self.customer_data = read_excel(self.excel_file_path, header=None)
+            for index, row_data in self.customer_data.iterrows():
+                current_list = [self.clean_and_convert_String(str(x)).lower() for x in row_data]
+                if "customer name" in current_list:
+                    self.true_header = current_list
+                    break
             
             # Iterate through DataFrame and insert into the Treeview
             for index, row_data in self.customer_data.iterrows():
                 try:
-                    customer_name = str(self.clean_and_convert_String(row_data.iloc[0])).title()
                     disbursal_date = "(Month Year as stated above)"
-                    loan_amount = float(self.clean_and_convert_Integer(row_data.iloc[2]))
+
+                    customer_name_index = self.true_header.index('customer name')
+                    customer_name = str(self.clean_and_convert_String(str(row_data.iloc[ customer_name_index ]))).title() if notna(row_data.iloc[ customer_name_index ]) else ""
+                    
+                    loan_amount_index = self.true_header.index('contract amt')
+                    loan_amount = float(self.clean_and_convert_Integer(str(row_data[ loan_amount_index ])))
 
                     payment_slab = 0.9
-                    
+
                     incentive = loan_amount * payment_slab / 100
-                    
+
                     # Insert the row into the Treeview
                     self.tree.insert("", END, values=(
                         disbursal_date, 
@@ -180,7 +186,7 @@ class InvoiceAutomation:
                     print(f"Error processing row: {e}")
                     pass
             if not self.tree.get_children():
-                raise ValueError("No valid rows loaded from Excel")
+                raise ValueError("Header must be included in Excel file")
 
         except FileNotFoundError:
             messagebox.showerror("Error", f"Excel file not found at: {self.excel_file_path}")
@@ -253,7 +259,6 @@ class InvoiceAutomation:
                     current_values[5] = self.IntComma(f"{incentive:.2f}")
 
                 except ValueError:
-                    print("ISSUE 2")
                     messagebox.showerror("Invalid Input", "Loan Amount and Payment Slab must be numbers.")
                     return
 
@@ -480,6 +485,7 @@ class InvoiceAutomation:
             if save_path:
                 doc.save('filled.docx')
                 convert('filled.docx', save_path)
+                print("\nINVOICE HAS BEEN GENERATED !")
                 messagebox.showinfo("Success", "Invoice created and saved successfully!")
             
             try:
@@ -493,4 +499,4 @@ class InvoiceAutomation:
             except Exception as e:
                 pass
         except PermissionError:
-            messagebox.showerror("Error", "Permission denied. Please close the file if it's open and try again.")
+            messagebox.showerror("Error", "Permission denied. Please close the file and try again.")

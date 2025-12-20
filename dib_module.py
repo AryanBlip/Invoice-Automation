@@ -152,23 +152,36 @@ class InvoiceAutomation:
             for item in self.tree.get_children():
                 self.tree.delete(item)
 
-            df = read_excel(self.excel_file_path, header=None)
+            self.true_header = []
 
-            # TODO: FIX PAYMENT SLAB ISSUE AND REFER TO TABULAR FORMAT OF DIB
-            # Columns: 1, 2, 3, 6, 7, 8, 9 in Excel. Payout and VAT are calculated.
-            self.customer_data = df.iloc[:, [5, 1, 2, 3, 6, 7]].copy()
-
-            for _, row_data in self.customer_data.iterrows():
+            # true header is the fetched header from excel file to identify data
+            self.customer_data = read_excel(self.excel_file_path, header=None)
+            for index, row_data in self.customer_data.iterrows():
+                current_list = [self.clean_and_convert_String(str(x)).lower() for x in row_data]
+                if "customer name" in current_list:
+                    self.true_header = current_list
+                    break
+            
+            # Iterate through DataFrame and insert into the Treeview
+            for index, row_data in self.customer_data.iterrows():
                 try:
-                    # Clean and process data from Excel
                     disbursal_date_str = "(Month Year as stated above)"
-                    app_ref = self.clean_and_convert_String(row_data.iloc[1]) if notna(row_data.iloc[1]) else ""
-                    customer_name = self.clean_and_convert_String(row_data.iloc[2]).title() if notna(row_data.iloc[2]) else ""
+
+                    # notna returns False for na (Invalid string)
+                    app_ref_index = self.true_header.index('app id')
+                    app_ref = str(self.clean_and_convert_String(row_data.iloc[ app_ref_index ])) if notna(row_data.iloc[ app_ref_index ]) else ""
+
+                    customer_name_index = self.true_header.index('customer name')
+                    customer_name = str(self.clean_and_convert_String(str(row_data.iloc[ customer_name_index ]))).title() if notna(row_data.iloc[ customer_name_index ]) else ""
                     
                     # Clean all numeric strings using sub
-                    loan_amount = float(self.clean_and_convert_Integer(row_data.iloc[3]))
+                    loan_amount_index = self.true_header.index('financial amount')
+                    loan_amount = float(self.clean_and_convert_Integer(str(row_data[ loan_amount_index ]))) if notna(row_data.iloc[ loan_amount_index ]) else 0
                 
                     payment_slab = float(self.clean_and_convert_String(str(row_data.iloc[4]))) * 100
+
+                    payment_slab_index = self.true_header.index("rate")
+                    payment_slab = float(self.clean_and_convert_String(str(row_data.iloc[ payment_slab_index ]))) * 100
                     
                     # Calculated values
                     Incentive = loan_amount * (payment_slab / 100)
@@ -186,7 +199,7 @@ class InvoiceAutomation:
                     print(f"Error processing row: {e}")
                     pass
             if not self.tree.get_children():
-                raise ValueError("No valid rows loaded from Excel")
+                raise ValueError("Header must be included in Excel file.")
 
         except FileNotFoundError:
             messagebox.showerror("Error", f"Excel file not found at: {self.excel_file_path}")
@@ -500,6 +513,7 @@ class InvoiceAutomation:
             if save_path:
                 doc.save('filled.docx')
                 convert('filled.docx', save_path)
+                print("\nINVOICE HAS BEEN GENERATED !")
                 messagebox.showinfo("Success", "Invoice created and saved successfully!")
             try:
                 self.root.destroy()
@@ -512,4 +526,4 @@ class InvoiceAutomation:
             except Exception as e:
                 pass
         except PermissionError:
-            messagebox.showerror("Error", "Permission denied. Close the file if it's open and try again.")
+            messagebox.showerror("Error", "Permission denied. Close the file and try again.")
