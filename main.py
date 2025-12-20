@@ -1,5 +1,5 @@
 print("WELCOME TO INVOICE GENERATION !")
-
+# CREATE AN INVOICE IN 40 SECONDS
 from tkinter import Tk, Toplevel, TclError
 from tkinter import messagebox, Label
 from tkinter import ttk, StringVar
@@ -125,7 +125,6 @@ if __name__ == "__main__":
     try:
         app = MainApp()
         app.run()
-        print("\nINVOICE HAS BEEN GENERATED !")
         print("\nWindow can be closed.\nAuto Closing in 2 Minutes...")
 
     except Exception as e:
