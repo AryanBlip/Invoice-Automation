@@ -11,13 +11,11 @@ import sys
 from os import path
 
 def resource_path(relative_path):
-    """Get path to resource for both .py (VS Code) and Nuitka .exe"""
     if getattr(sys, 'frozen', False):
-        # Nuitka (compiled exe)
-        base_path = path.dirname(sys.executable)
+        base_path = path.dirname(path.abspath(sys.argv[0]))
     else:
-        # Normal Python (.py script in VS Code)
-        base_path = path.dirname(__file__)
+        base_path = path.dirname(path.abspath(__file__))
+        
     return path.join(base_path, relative_path)
 
 class InvoiceAutomation:
@@ -40,18 +38,22 @@ class InvoiceAutomation:
         input_frame = Frame(main_frame)
         input_frame.pack(fill="x", pady=5)
 
+        self.invoice_date = datetime.today().strftime('%d/%m/%Y')
+        year = self.invoice_date.split("/")[-1]
+
         self.invoice_number_label = Label(input_frame, text="Invoice Number:", anchor="e")
         self.invoice_number_label.grid(row=0, column=0, padx=5, pady=2, sticky="ew")
         self.invoice_number_entry = Entry(input_frame)
+        self.invoice_number_entry.insert(END, self.getNextInvoiceNumber() + f"/{year}")
         self.invoice_number_entry.grid(row=0, column=1, padx=5, pady=2, sticky="ew")
 
-        self.invoice_date = datetime.today().strftime('%d/%m/%Y')
-        
+
         self.invoice_date_label = Label(input_frame, text="Invoice Date:", anchor="e")
         self.invoice_date_label.grid(row=1, column=0, padx=5, pady=2, sticky="ew")
         self.invoice_date_entry = Entry(input_frame)
         self.invoice_date_entry.insert(END, self.invoice_date)
         self.invoice_date_entry.grid(row=1, column=1, padx=5, pady=2, sticky="ew")
+
 
         self.month_year_label = Label(input_frame, text="Month Year:", anchor="e")
         self.month_year_label.grid(row=2, column=0, padx=5, pady=2, sticky="ew")
@@ -102,6 +104,30 @@ class InvoiceAutomation:
 
         # Load Excel data
         self.load_data_from_excel()
+    
+    @staticmethod
+    def getNextInvoiceNumber():
+        counterPath = resource_path("counter.txt")
+        
+        # Read current
+        with open(counterPath, "r") as f:
+            line = f.readline()
+            current_num = line.split(" ")[-1]
+
+        return current_num.strip().zfill(3)
+    
+    @staticmethod
+    def incrementInvoiceCounter():
+        counterPath = resource_path("counter.txt")
+        # Read current
+        with open(counterPath, "r") as f:
+            line = f.readline()
+            current_num = line.split(" ")[-1]
+
+        # Write next
+        next_num = int(current_num) + 1
+        with open(counterPath, "w") as f:
+            f.write(f"Next Invoice Number : {next_num}")
 
     @staticmethod
     def IntComma(num):
@@ -162,6 +188,8 @@ class InvoiceAutomation:
                     self.true_header = current_list
                     break
             
+            # print(f"true header : {self.true_header}")
+            
             # Iterate through DataFrame and insert into the Treeview
             for index, row_data in self.customer_data.iterrows():
                 try:
@@ -177,8 +205,6 @@ class InvoiceAutomation:
                     # Clean all numeric strings using sub
                     loan_amount_index = self.true_header.index('financial amount')
                     loan_amount = float(self.clean_and_convert_Integer(str(row_data[ loan_amount_index ]))) if notna(row_data.iloc[ loan_amount_index ]) else 0
-                
-                    payment_slab = float(self.clean_and_convert_String(str(row_data.iloc[4]))) * 100
 
                     payment_slab_index = self.true_header.index("rate")
                     payment_slab = float(self.clean_and_convert_String(str(row_data.iloc[ payment_slab_index ]))) * 100
@@ -187,6 +213,8 @@ class InvoiceAutomation:
                     Incentive = loan_amount * (payment_slab / 100)
                     payout = Incentive / 1.05
                     fivePercentVat = Incentive / 21
+
+                    # print(f"{disbursal_date_str} {app_ref} {customer_name} {loan_amount} {payment_slab} {Incentive}")
 
                     self.tree.insert("", END, values=(
                         disbursal_date_str, app_ref, customer_name,
@@ -514,7 +542,11 @@ class InvoiceAutomation:
                 doc.save('filled.docx')
                 convert('filled.docx', save_path)
                 print("\nINVOICE HAS BEEN GENERATED !")
+
+                # INCREMENT INVOICE NUMBER COUNTER.TXT
+                self.incrementInvoiceCounter()
                 messagebox.showinfo("Success", "Invoice created and saved successfully!")
+
             try:
                 self.root.destroy()
                 self.main_app_root.destroy()

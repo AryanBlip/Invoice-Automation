@@ -51,8 +51,13 @@ class MainApp:
         
     def ask_excel_file(self):
         file_path = filedialog.askopenfilename(
-            title="Select an Excel file",
-            filetypes=(("Excel files", "*.xlsx"), ("All files", "*.*"))
+            title="Select an Excel or ODF file",
+            filetypes=(
+                ("Spreadsheet files", "*.xlsx *.ods"), 
+                ("Excel files", "*.xlsx"), 
+                ("ODF files", "*.ods"), 
+                ("All files", "*.*")
+            )
         )
         if file_path:
             self.excel_file_path = file_path
