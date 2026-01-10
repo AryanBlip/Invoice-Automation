@@ -1,5 +1,4 @@
-# TODO: FOR NOW, COMPLETE BACKUP IS TAKEN ON GITHUB - aryanBLIP, djjerr
-# FIX FORMATTING PROBLEM WITH INVOICE NUMBER : [invoice no]
+
 from datetime import datetime
 from tkinter import filedialog, messagebox, ttk, Label, Frame, Entry
 from tkinter import TclError, END, Button, VERTICAL, CENTER 
@@ -540,4 +539,5 @@ class InvoiceAutomation:
             except Exception as e:
                 pass
         except PermissionError:
+
             messagebox.showerror("Error", "Permission denied. Please close the file and try again.")
