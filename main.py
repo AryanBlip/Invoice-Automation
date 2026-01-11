@@ -1,4 +1,4 @@
-print("WELCOME TO INVOICE GENERATION !")
+print("WELCOME TO INVOICE GENERATION !\n")
 # CREATE AN INVOICE IN 40 SECONDS
 from tkinter import Tk, Toplevel, TclError
 from tkinter import messagebox, Label
@@ -6,6 +6,20 @@ from tkinter import ttk, StringVar
 from tkinter import filedialog, Button
 
 #TODO: ADD INSTRUCTIONS
+print("PRE REQUISITES >")
+print("1> Copy the tabular data into an Excel file ALONG WITH ITS HEADER ROW")
+print("2> Save the Excel file \n")
+
+print("STEPS TO CREATE INVOICE:-")
+print("Step 1: Select the bank in the 'Select Bank' dropdown")
+print("Step 2: Click 'Browse..' to select the saved Excel file - Click '*All Files' on Bottom Right to view all files")
+print("Step 3: Click 'Load Data' to load data from the Excel file")
+print("Step 4: Ensure correct information/calculation - Double click to edit a value and click 'Enter' on Keyboard")
+print("Step 5: Enter the Month and Year in the 'Month Year'")
+print("Step 6: Click 'Create Invoice' to proceed")
+print("Step 7: Select the directory to save the newly created invoice")
+print("Step 8: Wait for confirmation Pop Up")
+print("Step 9: Find your newly saved invoice")
 
 class MainApp:
     def __init__(self):

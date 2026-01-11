@@ -1,3 +1,6 @@
+# TODO: FOR NOW, COMPLETE BACKUP IS TAKEN ON GITHUB - aryanBLIP, djjerr
+# 20/12/2025 - FIX FORMATTING PROBLEM WITH INVOICE NUMBER : [invoice no] 
+# NOTE: ABOVE PROBLEM SEEMS TO BE FIXED FOR NOW (10/1/2026)
 
 from datetime import datetime
 from tkinter import filedialog, messagebox, ttk, Label, Frame, Entry
@@ -202,7 +205,8 @@ class InvoiceAutomation:
                     
                     incentive = loan_amount * payment_slab / 100
 
-                    print(f"\nDisbursal date : {disbursal_date}\ncustomer name : {customer_name},\nloan amount : {loan_amount},\nLMF : {LMF_no}\nincentive : {incentive}")
+                    # TODO: REMOVE LINE (THIS IS USED FOR DEBUGGING)
+                    # print(f"\nDisbursal date : {disbursal_date}\ncustomer name : {customer_name},\nloan amount : {loan_amount},\nLMF : {LMF_no}\nincentive : {incentive}")
                     
                     # Insert the row into the Treeview
                     self.tree.insert("", END, values=(
@@ -539,5 +543,4 @@ class InvoiceAutomation:
             except Exception as e:
                 pass
         except PermissionError:
-
             messagebox.showerror("Error", "Permission denied. Please close the file and try again.")
